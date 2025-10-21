@@ -1,0 +1,44 @@
+# 编译产物
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE 文件
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.bak
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# Maven 相关
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# 测试覆盖率报告
+*.exec
+.jacoco/
