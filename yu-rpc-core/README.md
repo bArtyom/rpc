@@ -98,5 +98,3 @@ RpcApplication.refreshConfig();
 
 MIT License
 
-2
-
