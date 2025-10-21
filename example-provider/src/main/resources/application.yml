@@ -1,0 +1,6 @@
+rpc:
+  name: yu-rpc-yaml
+  version: 1.0-yaml
+  serverHost: localhost
+  serverPort: 8081
+  serializer: json

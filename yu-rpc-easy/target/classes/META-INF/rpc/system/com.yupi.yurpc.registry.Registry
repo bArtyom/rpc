@@ -1,0 +1,3 @@
+etcd=com.yupi.yurpc.registry.EtcdRegistry
+zookeeper=com.yupi.yurpc.registry.ZooKeeperRegistry
+redis=com.yupi.yurpc.registry.RedisRegistry
