@@ -35,8 +35,13 @@ public class ConsistentHashLoadBalancer implements LoadBalancer{
             }
         }
 
-        //获取调用请求的hash值
-        int hash=getHash(requestParams);
+        //获取调用请求的hash值（优先使用客户端IP）
+        String hashKey = (String) requestParams.get("clientIp");
+        if (hashKey == null || hashKey.isEmpty()) {
+            // 如果没有客户端IP，使用methodName
+            hashKey = (String) requestParams.getOrDefault("methodName", "default");
+        }
+        int hash=getHash(hashKey);
 
         //选择最接近且大于等于调用请求hash值的虚拟节点
         Map.Entry<Integer, ServiceMetaInfo> entry=virtualNodes.ceilingEntry(hash);

@@ -45,6 +45,18 @@ import java.util.concurrent.CountDownLatch;
 public class ServiceProxy implements InvocationHandler {
 
     /**
+     * 获取客户端本地IP地址
+     */
+    private String getClientIp() {
+        try {
+            return java.net.InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception e) {
+            // 获取失败时返回默认值
+            return "127.0.0.1";
+        }
+    }
+
+    /**
      * 调用代理
      *
      * @return
@@ -79,9 +91,10 @@ public class ServiceProxy implements InvocationHandler {
 
             //负载均衡
             LoadBalancer loadBalancer = LoadBalancerFactory.getInstance(rpcConfig.getLoadBalance());
-            //将调用方法名（请求路径）作为负载均衡参数
+            //将调用方法名（请求路径）和客户端IP作为负载均衡参数
             Map<String,Object> requestParams = new HashMap<>();
             requestParams.put("methodName",rpcRequest.getMethodName());
+            requestParams.put("clientIp",getClientIp());
             ServiceMetaInfo selectedServiceMetaInfo = loadBalancer.select(requestParams, serviceMetaInfoList);
             System.out.println("负载均衡选择服务：" + selectedServiceMetaInfo);
             
