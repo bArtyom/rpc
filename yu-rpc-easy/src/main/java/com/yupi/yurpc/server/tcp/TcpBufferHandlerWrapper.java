@@ -28,8 +28,8 @@ public class TcpBufferHandlerWrapper implements Handler<Buffer> {
             @Override
             public void handle(Buffer buffer) {
                 if(-1==size){
-                    //读取消息长度
-                    size=buffer.getInt(4);
+                    //读取消息体长度（从偏移量13开始的4个字节）
+                    size=buffer.getInt(13);
                     parser.fixedSizeMode(size);
                     //写入头信息到结果
                     resultBuffer.appendBuffer(buffer);

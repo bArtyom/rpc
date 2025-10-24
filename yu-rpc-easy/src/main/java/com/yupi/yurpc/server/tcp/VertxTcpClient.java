@@ -32,9 +32,12 @@ public class VertxTcpClient {
         CompletableFuture<RpcResponse> responseFuture=new CompletableFuture<>();
         netClient.connect(serviceMetaInfo.getServicePort(),serviceMetaInfo.getServiceHost(),result->{
            if(!result.succeeded()){
-               System.err.println("连接服务器失败");
+               System.err.println("❌ 连接服务器失败: " + result.cause().getMessage());
+               responseFuture.completeExceptionally(new RuntimeException("连接失败", result.cause()));
                return;
            }
+           System.out.println("✅ 成功连接到服务器: " + serviceMetaInfo.getServiceHost() + ":" + serviceMetaInfo.getServicePort());
+           
            //连接成功返回一个socket
             NetSocket socket=result.result();
            //发送数据
@@ -44,6 +47,8 @@ public class VertxTcpClient {
             header.setMagic(ProtocolConstant.PROTOCOL_MAGIC);
             header.setVersion(ProtocolConstant.PROTOCOL_VERSION);
             header.setSerializer((byte)ProtocolMessageSerializerEnum.getEnumByValue(RpcApplication.getRpcConfig().getSerializer()).getKey());
+            header.setType((byte) ProtocolMessageTypeEnum.REQUEST.getKey());
+            header.setStatus((byte) ProtocolMessageStatusEnum.OK.getValue());
             //生成全局id
             header.setRequestId(IdUtil.getSnowflakeNextId());
             protocolMessage.setHeader( header);
@@ -52,18 +57,23 @@ public class VertxTcpClient {
             //编码请求
             try {
                 Buffer encodeBuffer= ProtocolMessageEncoder.encode(protocolMessage);
+                System.out.println("📤 发送请求，长度: " + encodeBuffer.length() + " 字节");
                 socket.write(encodeBuffer);
             } catch (IOException e) {
-                throw new RuntimeException("协议消息编码错误");
+                System.err.println("❌ 协议消息编码错误: " + e.getMessage());
+                responseFuture.completeExceptionally(new RuntimeException("协议消息编码错误", e));
+                return;
             }
 
             //接收响应
             TcpBufferHandlerWrapper bufferHandlerWrapper=new TcpBufferHandlerWrapper(buffer->{
                 try {
+                    System.out.println("📥 收到响应，长度: " + buffer.length() + " 字节");
                     ProtocolMessage<RpcResponse> rpcResponseProtocolMessage= (ProtocolMessage<RpcResponse>) ProtocolMessageDecoder.decode(buffer);
                     responseFuture.complete(rpcResponseProtocolMessage.getBody());
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    System.err.println("❌ 响应解码错误: " + e.getMessage());
+                    responseFuture.completeExceptionally(new RuntimeException("响应解码错误", e));
                 }
             });
             socket.handler(bufferHandlerWrapper);

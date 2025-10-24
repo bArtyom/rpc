@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 控制台输出 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%-5level] %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ============================================ -->
+    <!-- 第三方库日志级别设置（只显示 WARN 及以上）    -->
+    <!-- ============================================ -->
+    
+    <!-- Netty 相关 -->
+    <logger name="io.netty" level="WARN"/>
+    
+    <!-- gRPC 相关 -->
+    <logger name="io.grpc" level="WARN"/>
+    
+    <!-- Vert.x 相关 -->
+    <logger name="io.vertx" level="WARN"/>
+    
+    <!-- Hutool 相关 -->
+    <logger name="cn.hutool" level="WARN"/>
+    
+    <!-- ============================================ -->
+    <!-- 你的 RPC 框架日志（保留重要信息）            -->
+    <!-- ============================================ -->
+    
+    <!-- RPC 核心日志 -->
+    <logger name="com.yupi.yurpc" level="INFO"/>
+    
+    <!-- 服务发现日志 -->
+    <logger name="com.yupi.yurpc.registry" level="INFO"/>
+    
+    <!-- SPI 加载日志（可选：设为 WARN 以隐藏） -->
+    <logger name="com.yupi.yurpc.spi" level="WARN"/>
+    
+    <!-- 负载均衡日志 -->
+    <logger name="com.yupi.yurpc.loadbalancer" level="INFO"/>
+    
+    <!-- ============================================ -->
+    <!-- 你的业务代码日志（全部显示）                -->
+    <!-- ============================================ -->
+    
+    <logger name="com.yupi.example" level="DEBUG"/>
+    
+    <!-- ============================================ -->
+    <!-- 根日志级别                                   -->
+    <!-- ============================================ -->
+    
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

@@ -3,7 +3,7 @@ package com.yupi.yurpc.fault.retry;
 /**
  * 重试策略枚举
  */
-public class RetryStrategyKeys {
+public interface RetryStrategyKeys {
     /**
      * 不进行重试
      */

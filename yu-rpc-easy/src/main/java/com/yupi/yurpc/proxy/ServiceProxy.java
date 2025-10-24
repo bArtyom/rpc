@@ -8,6 +8,8 @@ import cn.hutool.http.HttpResponse;
 import com.yupi.yurpc.RpcApplication;
 import com.yupi.yurpc.config.RpcConfig;
 import com.yupi.yurpc.constant.RpcConstant;
+import com.yupi.yurpc.fault.retry.RetryStrategy;
+import com.yupi.yurpc.fault.retry.RetryStrategyFactory;
 import com.yupi.yurpc.loadbalancer.LeastActiveLoadBalancer;
 import com.yupi.yurpc.loadbalancer.LoadBalancer;
 import com.yupi.yurpc.loadbalancer.LoadBalancerFactory;
@@ -107,7 +109,14 @@ public class ServiceProxy implements InvocationHandler {
             
             try {
                 // 发送 TCP 请求
-                RpcResponse rpcResponse = VertxTcpClient.doRequest(rpcRequest, selectedServiceMetaInfo);
+                System.out.println("开始调用服务：" + selectedServiceMetaInfo);
+                //使用重试机制
+                RetryStrategy retryStrategy= RetryStrategyFactory.getInstance(rpcConfig.getRetryStrategy());
+                System.out.println("使用重试策略：" + retryStrategy);
+                //单行lamda可以省略大括号和return，如果省略了必须也得省略分号
+                RpcResponse rpcResponse =retryStrategy.doRetry(()->
+                    VertxTcpClient.doRequest(rpcRequest,selectedServiceMetaInfo)
+                );
                 return rpcResponse.getData();
             } finally {
                 // 在调用完成后(无论成功还是失败),如果使用最少活跃数负载均衡器,减少活跃数计数

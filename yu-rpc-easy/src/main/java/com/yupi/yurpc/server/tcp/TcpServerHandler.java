@@ -18,16 +18,23 @@ public class TcpServerHandler implements Handler<NetSocket> {
 
     @Override
     public void handle(NetSocket netSocket) {
+        System.out.println("✅ 客户端连接: " + netSocket.remoteAddress());
+        
         // 处理连接
         TcpBufferHandlerWrapper bufferHandlerWrapper=new TcpBufferHandlerWrapper(buffer -> {
+            System.out.println("📥 收到请求，长度: " + buffer.length() + " 字节");
+            
             // 接受请求，解码
             ProtocolMessage<RpcRequest> protocolMessage;
             try {
                 protocolMessage = (ProtocolMessage<RpcRequest>) ProtocolMessageDecoder.decode(buffer);
+                System.out.println("✅ 请求解码成功");
             } catch (IOException e) {
+                System.err.println("❌ 协议消息解码错误: " + e.getMessage());
                 throw new RuntimeException("协议消息解码错误");
             }
             RpcRequest rpcRequest = protocolMessage.getBody();
+            System.out.println("📋 调用方法: " + rpcRequest.getServiceName() + "." + rpcRequest.getMethodName());
 
             // 处理请求
             // 构造响应结果对象
@@ -36,12 +43,14 @@ public class TcpServerHandler implements Handler<NetSocket> {
                 // 获取要调用的服务实现类，通过反射调用
                 Class<?> implClass = LocalRegistry.get(rpcRequest.getServiceName());
                 Method method = implClass.getMethod(rpcRequest.getMethodName(), rpcRequest.getParameterTypes());
-                Object result = method.invoke(implClass.newInstance(), rpcRequest.getArgs());
+                Object result = method.invoke(implClass.getDeclaredConstructor().newInstance(), rpcRequest.getArgs());
                 // 封装返回结果
                 rpcResponse.setData(result);
                 rpcResponse.setDataType(method.getReturnType());
                 rpcResponse.setMessage("ok");
+                System.out.println("✅ 方法调用成功，返回结果: " + result);
             } catch (Exception e) {
+                System.err.println("❌ 方法调用失败: " + e.getMessage());
                 e.printStackTrace();
                 rpcResponse.setMessage(e.getMessage());
                 rpcResponse.setException(e);
@@ -53,8 +62,10 @@ public class TcpServerHandler implements Handler<NetSocket> {
             ProtocolMessage<RpcResponse> responseProtocolMessage = new ProtocolMessage<>(header, rpcResponse);
             try {
                 Buffer encode = ProtocolMessageEncoder.encode(responseProtocolMessage);
+                System.out.println("📤 发送响应，长度: " + encode.length() + " 字节");
                 netSocket.write(encode);
             } catch (IOException e) {
+                System.err.println("❌ 协议消息编码错误: " + e.getMessage());
                 throw new RuntimeException("协议消息编码错误");
             }
         });

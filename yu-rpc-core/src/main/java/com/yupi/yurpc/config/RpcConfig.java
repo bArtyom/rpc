@@ -1,4 +1,5 @@
 package com.yupi.yurpc.config;
+import com.yupi.yurpc.fault.retry.RetryStrategyKeys;
 import com.yupi.yurpc.loadbalancer.LoadBalancerKeys;
 import lombok.Data;
 
@@ -47,5 +48,10 @@ public class RpcConfig {
      * 负载均衡类型
      */
     private String loadBalance = LoadBalancerKeys.ROUND_ROBIN;
+
+    /**
+     * 重试策略类型
+     */
+    private String retryStrategy= RetryStrategyKeys.NO;
 
 }

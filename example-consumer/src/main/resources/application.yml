@@ -1,8 +1,6 @@
 rpc:
   name: yu-rpc-yaml
   version: 1.0-yaml
-  serverHost: localhost
-  serverPort: 8081
   serializer: json
   mock: false
   loadBalance: roundRobin  # 负载均衡策略：roundRobin（轮询）/ random（随机）/ consistentHash（一致性哈希）
