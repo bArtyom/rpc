@@ -20,7 +20,7 @@ public class RpcResponse implements Serializable {
      * 响应数据
      */
     private Object data;
-
+    
     /**
      * 响应数据类型（预留）
      */

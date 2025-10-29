@@ -10,6 +10,8 @@ import com.yupi.yurpc.config.RpcConfig;
 import com.yupi.yurpc.constant.RpcConstant;
 import com.yupi.yurpc.fault.retry.RetryStrategy;
 import com.yupi.yurpc.fault.retry.RetryStrategyFactory;
+import com.yupi.yurpc.fault.tolerant.TolerantStrategy;
+import com.yupi.yurpc.fault.tolerant.TolerantStrategyFactory;
 import com.yupi.yurpc.loadbalancer.LeastActiveLoadBalancer;
 import com.yupi.yurpc.loadbalancer.LoadBalancer;
 import com.yupi.yurpc.loadbalancer.LoadBalancerFactory;
@@ -106,7 +108,7 @@ public class ServiceProxy implements InvocationHandler {
                 ((LeastActiveLoadBalancer) loadBalancer)
                     .increaseActive(selectedServiceMetaInfo.getServiceAddress());
             }
-            
+            RpcResponse rpcResponse = null;
             try {
                 // 发送 TCP 请求
                 System.out.println("开始调用服务：" + selectedServiceMetaInfo);
@@ -114,17 +116,34 @@ public class ServiceProxy implements InvocationHandler {
                 RetryStrategy retryStrategy= RetryStrategyFactory.getInstance(rpcConfig.getRetryStrategy());
                 System.out.println("使用重试策略：" + retryStrategy);
                 //单行lamda可以省略大括号和return，如果省略了必须也得省略分号
-                RpcResponse rpcResponse =retryStrategy.doRetry(()->
+                rpcResponse =retryStrategy.doRetry(()->
                     VertxTcpClient.doRequest(rpcRequest,selectedServiceMetaInfo)
                 );
                 return rpcResponse.getData();
-            } finally {
+            } catch (Exception e){
+                // 构建容错策略的上下文信息
+                Map<String, Object> tolerantContext = new HashMap<>();
+                tolerantContext.put("method", method);
+                tolerantContext.put("args", args);
+                tolerantContext.put("serviceMetaInfo", selectedServiceMetaInfo);
+                tolerantContext.put("serviceMetaInfoList", serviceMetaInfoList);
+                tolerantContext.put("rpcRequest", rpcRequest); // 添加 rpcRequest，用于 Fail-Over 重试
+                // 可选：如果有降级服务实例，可以放入 context
+                // tolerantContext.put("fallbackService", fallbackServiceInstance);
+                
+                TolerantStrategy tolerantStrategy= TolerantStrategyFactory.getInstance(RpcApplication.getRpcConfig().getTolerantStrategy());
+                rpcResponse=tolerantStrategy.doTolerant(tolerantContext, e);
+            }
+            finally {
                 // 在调用完成后(无论成功还是失败),如果使用最少活跃数负载均衡器,减少活跃数计数
                 if (loadBalancer instanceof LeastActiveLoadBalancer) {
                     ((LeastActiveLoadBalancer) loadBalancer)
                         .decreaseActive(selectedServiceMetaInfo.getServiceAddress());
                 }
             }
+            
+            // 返回响应结果（可能是正常响应或降级响应）
+            return rpcResponse != null ? rpcResponse.getData() : null;
         } catch (Exception e) {
             throw new RuntimeException("调用失败");
         }

@@ -17,11 +17,8 @@ import com.yupi.yurpc.utils.ConfigUtils;
 public class ConsumerExample {
 
     public static void main(String[] args) {
-        // RPC 框架初始化
+        //服务提供者初始化
         RpcApplication.init();
-        
-//        RpcConfig rpc = ConfigUtils.loadConfig(RpcConfig.class, "rpc");
-//        System.out.println(rpc);
         // 获取代理
         UserService userService = ServiceProxyFactory.getProxy(UserService.class);
         User user = new User();

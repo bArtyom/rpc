@@ -60,11 +60,11 @@ public class EtcdRegistry implements Registry{
     public void init(RegistryConfig registryConfig) {
         client=Client.builder().endpoints(registryConfig.getAddress()).connectTimeout(Duration.ofMillis(registryConfig.getTimeout()))
                 .build();
-        kvClient=client.getKVClient();
+        kvClient=client.getKVClient();                                                                                                                                                                                                                  
         heartBeat();
     }
 
-    /**
+    /** 
      * 本地注册的节点集合
      */
     private final Set<String> localRegisterNodeKeySet=new HashSet<>();
@@ -113,7 +113,7 @@ public class EtcdRegistry implements Registry{
      * 注册中心服务缓存
      */
     private final RegistryServiceCache registryServiceCache=new RegistryServiceCache();
-
+ 
     @Override
     public List<ServiceMetaInfo> serviceDiscovery(String serviceKey) {
         //优先从缓存获取服务

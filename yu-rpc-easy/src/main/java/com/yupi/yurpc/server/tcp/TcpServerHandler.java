@@ -43,14 +43,12 @@ public class TcpServerHandler implements Handler<NetSocket> {
                 // 获取要调用的服务实现类，通过反射调用
                 Class<?> implClass = LocalRegistry.get(rpcRequest.getServiceName());
                 Method method = implClass.getMethod(rpcRequest.getMethodName(), rpcRequest.getParameterTypes());
-                Object result = method.invoke(implClass.getDeclaredConstructor().newInstance(), rpcRequest.getArgs());
+                Object result = method.invoke(implClass.newInstance(), rpcRequest.getArgs());
                 // 封装返回结果
                 rpcResponse.setData(result);
                 rpcResponse.setDataType(method.getReturnType());
                 rpcResponse.setMessage("ok");
-                System.out.println("✅ 方法调用成功，返回结果: " + result);
             } catch (Exception e) {
-                System.err.println("❌ 方法调用失败: " + e.getMessage());
                 e.printStackTrace();
                 rpcResponse.setMessage(e.getMessage());
                 rpcResponse.setException(e);

@@ -10,9 +10,27 @@
         <module name="yu-rpc-core" />
         <module name="yu-rpc-easy" />
         <module name="example-provider" />
-        <module name="example-common" />
         <module name="example-consumer" />
+        <module name="example-common" />
+      </profile>
+      <profile name="Annotation profile for yu-rpc-spring-boot-starter" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-configuration-processor/3.5.7/spring-boot-configuration-processor-3.5.7.jar" />
+        </processorPath>
+        <module name="yu-rpc-spring-boot-starter" />
+        <module name="example-springboot-consumer" />
+        <module name="example-springboot-provider" />
       </profile>
     </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="example-springboot-consumer" options="-parameters" />
+      <module name="example-springboot-provider" options="-parameters" />
+      <module name="yu-rpc-spring-boot-starter" options="-parameters" />
+    </option>
   </component>
 </project>

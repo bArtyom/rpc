@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/yu-rpc.iml" filepath="$PROJECT_DIR$/.idea/yu-rpc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/yu-rpc-easy.iml" filepath="$PROJECT_DIR$/yu-rpc-easy.iml" />
     </modules>
   </component>
 </project>
